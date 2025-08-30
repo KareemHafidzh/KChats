@@ -9,42 +9,51 @@ import SwiftUI
 import FirebaseAuth
 
 struct ChatView: View {
-    // A constant to hold the chat ID for this conversation
-    let chatID: String
+    let otherUserEmail: String
     
-    @State private var messages: [Message] = []
-    @State var chatText: String = ""
-    var body: some View {
-        VStack{
-            ScrollView {
-                ForEach(messages) { message in
-                    ChatBubbleView(message: message)
-                }
-            }
-            
-            HStack {
-                TextField("Chat here", text: $chatText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                
-                Button(action: sendMessage) {
-                    Image(systemName: "paperplane.fill")
-                        .font(.title)
-                        .foregroundColor(.blue)
-                }
-                .padding(.trailing)
-            }
-            .padding(.vertical, 20)
-            .background(Color(.systemBackground))
-        }
-        .onAppear {
-            // Your function to fetch messages from Firestore
-            // This is where you would call your Firestore listener
-        }
-        .navigationTitle("Chat")
+    @StateObject var viewModel: ChatViewModel
+    
+    // Custom initializer to create the ViewModel with the required data
+    init(otherUserEmail: String) {
+        self.otherUserEmail = otherUserEmail
+        // Create an instance of the ViewModel and pass the other user's email
+        self._viewModel = StateObject(wrappedValue: ChatViewModel(otherUserEmail: otherUserEmail))
     }
     
-    func sendMessage() {
-            // Your logic for sending a message to Firestore
+    var body: some View {
+        Group {
+            if let _ = viewModel.chatID {
+                VStack(spacing: 0) {
+                    ScrollView {
+                        LazyVStack(spacing: 10) {
+                            ForEach(viewModel.messages) { message in
+                                ChatBubbleView(message: message)
+                                    .id(message.id)
+                            }
+                        }
+                    }
+                    .background(Color(.systemGray6))
+                    
+                    HStack {
+                        TextField("Type a message...", text: $viewModel.messageText)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+                        
+                        Button(action: viewModel.sendMessage) {
+                            Image(systemName: "paperplane.fill")
+                                .font(.title)
+                                .foregroundColor(.blue)
+                        }
+                        .padding(.trailing)
+                    }
+                    .padding(.vertical, 8)
+                    .background(Color(.systemBackground))
+                }
+            } else {
+                ProgressView("Starting chat...")
+            }
         }
+        .navigationTitle(otherUserEmail)
+        .navigationBarTitleDisplayMode(.inline)
+    }
 }

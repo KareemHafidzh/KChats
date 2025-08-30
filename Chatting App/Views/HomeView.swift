@@ -10,72 +10,29 @@ import FirebaseFirestore
 import FirebaseAuth
 
 struct HomeView: View {
-    @Environment(\.dismiss) var dismiss
-    @State private var searchText = ""
-    @State private var searchResults: [String] = []
+    @StateObject private var viewModel = HomeViewModel()
     
     var body: some View {
-        NavigationStack{
-            List{
-                // 3. Display the fetched search results
-                ForEach(searchResults, id: \.self) { email in
-                    NavigationLink(destination: ChatView(chatID: <#String#>)){
-                        Text(email)
+        NavigationStack {
+            List {
+                Section(header: Text("Search Results")) {
+                    ForEach(viewModel.searchResults) { user in
+                        NavigationLink(destination: ChatView(otherUserEmail: user.email)) {
+                            Text(user.email)
+                        }
                     }
                 }
             }
             .navigationTitle("KChats")
+            .searchable(text: $viewModel.searchText, prompt: "Search for a user or chat")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Log Out") {
-                        signOut()
+                        viewModel.signOut()
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "Search for an email")
-            .onChange(of: searchText) { oldText, newText in
-                searchUsers()
         }
-        }
-    }
-    
-    func signOut() {
-        do {
-            try Auth.auth().signOut()
-            dismiss()
-        } catch {
-            print("Error signing out: \(error.localizedDescription)")
-        }
-    }
-    
-    
-    func searchUsers() {
-        // Clear previous results before starting a new search
-        searchResults = []
-        
-        // Exit if search text is empty
-        guard !searchText.isEmpty else { return }
-        
-        let db = Firestore.firestore()
-        
-        db.collection("users")
-            .whereField("email", isGreaterThanOrEqualTo: searchText)
-            .whereField("email", isLessThanOrEqualTo: searchText + "~")
-            .getDocuments { (querySnapshot, error) in
-                if let error = error {
-                    print("Error getting documents: \(error)")
-                } else {
-                    // Map the documents to a list of emails
-                    var emails: [String] = []
-                    for document in querySnapshot!.documents {
-                        let email = document.data()["email"] as? String ?? ""
-                        if !email.isEmpty {
-                            emails.append(email)
-                        }
-                    }
-                    self.searchResults = emails
-                }
-            }
     }
 }
 

@@ -15,13 +15,11 @@ struct ChatBubbleView: View {
             if message.isFromUser {
                 Spacer()
             }
-            
             Text(message.text)
                 .padding(10)
                 .background(message.isFromUser ? Color.blue : Color(.systemGray5))
                 .foregroundColor(message.isFromUser ? .white : .black)
                 .cornerRadius(15)
-            
             if !message.isFromUser {
                 Spacer()
             }
