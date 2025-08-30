@@ -12,6 +12,8 @@ import FirebaseAuth
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         NavigationStack {
             List {
@@ -25,12 +27,18 @@ struct HomeView: View {
             }
             .navigationTitle("KChats")
             .searchable(text: $viewModel.searchText, prompt: "Search for a user or chat")
+            .textInputAutocapitalization(.never)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Log Out") {
                         viewModel.signOut()
                     }
                 }
+            }
+            
+            .onAppear {
+                // 2. Pass the dismiss action from the View to the ViewModel.
+                viewModel.dismiss = dismiss
             }
         }
     }

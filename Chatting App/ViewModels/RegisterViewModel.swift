@@ -8,20 +8,20 @@
 import Foundation
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 class RegisterViewModel: ObservableObject{
-    @Environment(\.dismiss) var dismiss
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var showingAlert = false
     @Published var alertMessage = ""
     
-    func RegisterUser() {
+    func RegisterUser(dismiss: DismissAction) {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error {
                 print(error)
-                alertMessage = error.localizedDescription
-                showingAlert = true
+                self.alertMessage = error.localizedDescription
+                self.showingAlert = true
             } else {
                 // Get the user's UID from the result
                 guard let user = authResult?.user else { return }
@@ -29,7 +29,7 @@ class RegisterViewModel: ObservableObject{
                 // Use the user's UID to create a document in the 'users' collection
                 let db = Firestore.firestore()
                 db.collection("users").document(user.uid).setData([
-                    "email": user.email,
+                    "email": user.email ?? "",
                     "uid": user.uid
                 ]) { dbError in
                     if let dbError = dbError {
@@ -37,7 +37,7 @@ class RegisterViewModel: ObservableObject{
                     } else {
                         print("User data saved successfully!")
                         // Dismiss the view to go back to the login screen
-                        self.dismiss()
+                        dismiss()
                     }
                 }
             }

@@ -24,6 +24,7 @@ class LoginViewModel:ObservableObject {
                 self.showingAlert = true
                 
             }else{
+                print("User data Authentication successfully!")
                 self.isLoggedIn = true
             }
         }

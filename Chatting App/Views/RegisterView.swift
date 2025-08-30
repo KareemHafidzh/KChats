@@ -12,6 +12,7 @@ import FirebaseFirestore
 struct RegisterView: View {
     
     @StateObject var viewModel = RegisterViewModel()
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack {
@@ -20,7 +21,7 @@ struct RegisterView: View {
             CustomSecureTextField(textInTheField: "Enter your password here!", text: $viewModel.password)
             
             Button {
-                viewModel.RegisterUser()
+                viewModel.RegisterUser(dismiss: dismiss)
             } label: {Text("Register")}
         }
         .alert("Login Error", isPresented: $viewModel.showingAlert) {

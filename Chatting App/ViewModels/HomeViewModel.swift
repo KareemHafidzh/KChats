@@ -21,13 +21,12 @@ class HomeViewModel: ObservableObject {
         }
     }
     @Published var searchResults: [User] = []
-    
-    @Environment(\.dismiss) var dismiss
+    var dismiss: DismissAction?
     
     func signOut() {
         do {
             try Auth.auth().signOut()
-            dismiss()
+            dismiss?()
         } catch {
             print("Error signing out: \(error.localizedDescription)")
         }

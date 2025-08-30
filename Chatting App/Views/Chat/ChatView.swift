@@ -11,14 +11,15 @@ import FirebaseAuth
 struct ChatView: View {
     let otherUserEmail: String
     
-    @StateObject var viewModel: ChatViewModel
+    @StateObject private var viewModel: ChatViewModel
+    @Environment(\.dismiss) var dismiss
     
-    // Custom initializer to create the ViewModel with the required data
     init(otherUserEmail: String) {
         self.otherUserEmail = otherUserEmail
-        // Create an instance of the ViewModel and pass the other user's email
         self._viewModel = StateObject(wrappedValue: ChatViewModel(otherUserEmail: otherUserEmail))
     }
+    
+    
     
     var body: some View {
         Group {
@@ -55,5 +56,12 @@ struct ChatView: View {
         }
         .navigationTitle(otherUserEmail)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+                    viewModel.dismiss = dismiss
+                    viewModel.findOrCreateChat()
+                }
+                .onDisappear {
+                    viewModel.listenerRegistration?.remove()
+                }
     }
 }

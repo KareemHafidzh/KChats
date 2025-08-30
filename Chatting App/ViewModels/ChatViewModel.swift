@@ -9,21 +9,29 @@ import Foundation
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
-//import FirebaseFirestoreSwift
 
 class ChatViewModel: ObservableObject {
     @Published var messages: [Message] = []
     @Published var messageText: String = ""
     @Published var chatID: String?
     
-    private let otherUserEmail: String
+    let otherUserEmail: String
+    var dismiss: DismissAction?
+    
+    // Declare a variable to hold the listener registration.
+    var listenerRegistration: ListenerRegistration?
     
     init(otherUserEmail: String) {
         self.otherUserEmail = otherUserEmail
         findOrCreateChat()
     }
     
-    private func findOrCreateChat() {
+    deinit {
+        // Remove the listener when the ViewModel is deallocated
+        listenerRegistration?.remove()
+    }
+    
+    func findOrCreateChat() {
         guard let currentUID = Auth.auth().currentUser?.uid else { return }
         
         let db = Firestore.firestore()
@@ -88,10 +96,12 @@ class ChatViewModel: ObservableObject {
         }
     }
     
-    private func fetchMessages() {
+    func fetchMessages() {
         guard let id = chatID else { return }
         
-        Firestore.firestore().collection("chats").document(id).collection("messages")
+        listenerRegistration?.remove()
+        
+        listenerRegistration = Firestore.firestore().collection("chats").document(id).collection("messages")
             .order(by: "timestamp")
             .addSnapshotListener { querySnapshot, error in
                 guard let documents = querySnapshot?.documents else { return }
