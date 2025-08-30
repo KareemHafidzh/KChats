@@ -19,7 +19,9 @@ struct HomeView: View {
             List{
                 // 3. Display the fetched search results
                 ForEach(searchResults, id: \.self) { email in
-                    Text(email)
+                    NavigationLink(destination: ChatView(chatID: <#String#>)){
+                        Text(email)
+                    }
                 }
             }
             .navigationTitle("KChats")
@@ -46,12 +48,13 @@ struct HomeView: View {
         }
     }
     
-    // 5. Function to perform the Firebase query
+    
     func searchUsers() {
         // Clear previous results before starting a new search
         searchResults = []
         
-        guard !searchText.isEmpty else { return } // Exit if search text is empty
+        // Exit if search text is empty
+        guard !searchText.isEmpty else { return }
         
         let db = Firestore.firestore()
         

@@ -1,25 +1,23 @@
-////
-////  Message.swift
-////  Chatting App
-////
-////  Created by Kareem Abdul Hafidzh on 29/08/25.
-////
-//
-//import Foundation
-//import FirebaseFirestore
-//import Firebase
-////import FirebaseFirestoreSwift
-//
-//struct Message: Identifiable, Codable {
-//    @DocumentID var id: String?
-//    let senderID: String
-//    let text: String
-//    let timestamp: Date
-//
-//    enum CodingKeys: String, CodingKey {
-//        case id
-//        case senderID
-//        case text
-//        case timestamp
-//    }
-//}
+import Foundation
+import FirebaseFirestore
+import FirebaseAuth
+
+struct Message: Identifiable, Codable {
+    // @DocumentID to automatically get the document ID
+    @DocumentID var id: String?
+    
+    // The UID of the sender
+    let senderID: String
+    
+    // The content of the message
+    let text: String
+    
+    // The server-side timestamp of the message
+    let timestamp: Date
+
+    // A computed property to determine if the message is from the current user.
+    // This is much cleaner than using the logic directly in the view.
+    var isFromUser: Bool {
+        return senderID == Auth.auth().currentUser?.uid
+    }
+}
